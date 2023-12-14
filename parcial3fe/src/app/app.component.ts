@@ -14,4 +14,13 @@ import { OauthComponent } from './features/oauth/oauth.component';
 export class AppComponent {
   title = 'parcial3fe';
   loggedIn : any;
+
+  token = localStorage.getItem("token");
+
+  ngOnInit(): void {
+
+    if(this.token!=null && this.token!=undefined){
+      this.loggedIn = true;
+    }
+  }
 }

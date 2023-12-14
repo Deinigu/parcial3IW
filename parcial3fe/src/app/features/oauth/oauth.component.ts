@@ -1,27 +1,26 @@
-import { SocialAuthService, SocialUser } from '@abacritt/angularx-social-login';
+import { GoogleLoginProvider, GoogleSigninButtonModule, SocialAuthService, SocialLoginModule, SocialUser } from '@abacritt/angularx-social-login';
 import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { OauthService } from '../../services/oauth.service';
-import { HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-oauth',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, GoogleSigninButtonModule],
   templateUrl: './oauth.component.html',
   styleUrl: './oauth.component.css',
-  providers: [OauthService, HttpClientModule]
+  providers: [OauthService]
 })
 export class OauthComponent{
-  idToken = '644438743416-8qs1a5l687337gn7kfmthut9jrvtv1bs.apps.googleusercontent.com';
+  idToken: any;
   user: SocialUser = new SocialUser;
   loggedIn: any;
   constructor(private authService: SocialAuthService, private router: Router, private oauthService: OauthService) { }
 
   ngOnInit() {
-    
     this.authService.authState.subscribe((user) => {
+      
       this.user = user;
       this.loggedIn = (user != null);
       if (user && user.idToken) {

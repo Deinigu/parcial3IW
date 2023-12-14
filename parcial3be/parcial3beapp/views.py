@@ -66,6 +66,7 @@ def oauth(request):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+
 # CLOUDINARY
 @api_view(['POST'])
 def upload_image(request):
