@@ -5,4 +5,5 @@ urlpatterns = [
 
     # PUJAS
     path('api/image/upload', views.upload_image),
+    path('logged', views.oauth)
 ]
