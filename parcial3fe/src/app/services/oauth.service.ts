@@ -13,7 +13,7 @@ export class OauthService {
 
   verifyToken(user: SocialUser): void {
     // Define your backend API URL
-    const backendUrl = 'http://13.38.223.212:8000/logged';
+    const backendUrl = 'http://localhost:8000/logged';
 
     // Send a POST request to the backend with the idToken
     this.http.post(backendUrl, { idtoken: user.idToken }).subscribe(
