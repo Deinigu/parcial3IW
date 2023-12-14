@@ -25,7 +25,7 @@ SECRET_KEY = 'django-insecure-z_hs0)ns0i*ox14^4cki*3$dd4y1j&53ty+7a3+p_#=#4jortk
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['13.38.223.212']
+ALLOWED_HOSTS = ['13.38.223.212','localhost']
 
 CORS_ORIGIN_ALLOW_ALL=True
 
@@ -35,7 +35,7 @@ CORS_ORIGIN_ALLOW_ALL=True
 INSTALLED_APPS = [
     'rest_framework',
     'parcial3beapp',
-    "corsheaders",
+    'corsheaders',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',

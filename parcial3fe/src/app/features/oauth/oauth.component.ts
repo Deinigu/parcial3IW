@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { OauthService } from '../../services/oauth.service';
+import { HttpClientModule } from '@angular/common/http';
 
 @Component({
   selector: 'app-oauth',
@@ -10,10 +11,10 @@ import { OauthService } from '../../services/oauth.service';
   imports: [CommonModule],
   templateUrl: './oauth.component.html',
   styleUrl: './oauth.component.css',
-  providers: [OauthService]
+  providers: [OauthService, HttpClientModule]
 })
 export class OauthComponent{
-  idToken: any;
+  idToken = '644438743416-8qs1a5l687337gn7kfmthut9jrvtv1bs.apps.googleusercontent.com';
   user: SocialUser = new SocialUser;
   loggedIn: any;
   constructor(private authService: SocialAuthService, private router: Router, private oauthService: OauthService) { }
@@ -21,7 +22,6 @@ export class OauthComponent{
   ngOnInit() {
     
     this.authService.authState.subscribe((user) => {
-      console.log("AAAAAAA")
       this.user = user;
       this.loggedIn = (user != null);
       if (user && user.idToken) {
@@ -36,5 +36,8 @@ export class OauthComponent{
     localStorage.removeItem("email");
     localStorage.removeItem("name");
     localStorage.removeItem("photoUrl");
+  }
+  handleAuth(): void{
+    console.log("test");
   }
 }

@@ -7,10 +7,11 @@ import { OauthComponent } from './features/oauth/oauth.component';
 @Component({
   selector: 'app-root',
   standalone: true,
-  imports: [CommonModule, RouterOutlet, HttpClientModule, OauthComponent],
+  imports: [CommonModule, RouterOutlet, OauthComponent, HttpClientModule],
   templateUrl: './app.component.html',
   styleUrl: './app.component.css'
 })
 export class AppComponent {
   title = 'parcial3fe';
+  loggedIn : any;
 }

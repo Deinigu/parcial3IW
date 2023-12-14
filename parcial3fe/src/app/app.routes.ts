@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { ImagenesComponent } from './features/imagenes/imagenes.component';
 import { InicioComponent } from './features/inicio/inicio.component';
 import { OauthComponent } from './features/oauth/oauth.component';
+import { MapComponent } from './features/map/map.component';
 
 export const routes: Routes = [
     {
@@ -15,8 +16,8 @@ export const routes: Routes = [
         title : 'Prueba imagen'
     },
     {
-        path : 'oauth',
-        component: OauthComponent,
-        title: 'Oauth'
+        path : 'map',
+        component : MapComponent,
+        title: 'Mapa'
     }
 ];
