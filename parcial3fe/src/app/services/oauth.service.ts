@@ -27,7 +27,6 @@ export class OauthService {
       },
       (error) => {
         console.error('Token verification error:', error);
-        // Handle the verification error as needed
       }
     );
   }
