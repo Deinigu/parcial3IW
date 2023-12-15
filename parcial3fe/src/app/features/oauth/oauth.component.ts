@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { AfterViewInit, Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { OauthService } from '../../services/oauth.service';
+import { HttpClient } from '@angular/common/http';
 
 @Component({
   selector: 'app-oauth',
@@ -16,7 +17,7 @@ export class OauthComponent{
   idToken: any;
   user: SocialUser = new SocialUser;
   loggedIn: any;
-  constructor(private authService: SocialAuthService, private router: Router, private oauthService: OauthService) { }
+  constructor(private authService: SocialAuthService, private router: Router, private oauthService: OauthService, private httpClient: HttpClient) { }
 
   ngOnInit() {
     this.authService.authState.subscribe((user) => {
