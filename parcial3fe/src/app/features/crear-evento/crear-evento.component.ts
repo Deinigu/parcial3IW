@@ -68,7 +68,7 @@ export class CrearEventoComponent {
   onSubmit() {
     let organizador : any;
     organizador = localStorage.getItem('email');
-    this.prueba.organizador = organizador;
+    this.prueba.organizador = 'diegolr02@uma.es';
 
     this.pruebaService.createPrueba(this.prueba).subscribe(response => {
       console.log(response);
