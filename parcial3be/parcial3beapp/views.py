@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from rest_framework.decorators import api_view
 from rest_framework.parsers import JSONParser
 from rest_framework import status
+from geopy.geocoders import Nominatim
 
 from pymongo import ReturnDocument
 
@@ -19,6 +20,9 @@ from google.oauth2 import id_token
 from google.auth.transport import requests
 
 from parcial3beapp.serializers import PruebaSerializer, TokenSerializer
+
+# -------- Geopy ---------
+geolocator = Nominatim(user_agent="my_geocoder")
 
 # ----------------------------------------  VISTAS DE LA APLICACIÓN ------------------------------
 # Conexión a la base de datos MongoDB
@@ -32,92 +36,152 @@ dbname = my_client["Parcial3DB"]
 # Colecciones
 collection_prueba = dbname["prueba"]
 
-# --------- CRUD DE OBJETOS --------
-@api_view(['GET', 'POST'])
-def prueba_view(request):
-    if request.method == 'GET':
-        prueba = list(collection_prueba.find({}))        
-        for p in prueba:
-            p['_id'] = str(ObjectId(p.get('_id',[])))
-            p['objid'] = str(ObjectId(p.get('objid',[])))
 
-        prueba_serializer = PruebaSerializer(data=prueba, many= True)
+# --------- CRUD DE OBJETOS --------
+@api_view(["GET", "POST"])
+def prueba_view(request):
+    if request.method == "GET":
+        prueba = list(collection_prueba.find({}))
+        for p in prueba:
+            p["_id"] = str(ObjectId(p.get("_id", [])))
+
+        prueba_serializer = PruebaSerializer(data=prueba, many=True)
         if prueba_serializer.is_valid():
             json_data = prueba_serializer.data
             return Response(json_data, status=status.HTTP_200_OK)
         else:
-            return Response(prueba_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+            return Response(
+                prueba_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+            )
 
-    elif request.method == 'POST':
+    elif request.method == "POST":
         serializer = PruebaSerializer(data=request.data)
         if serializer.is_valid():
             prueba = serializer.validated_data
-            #Probablemente esto se use para el oauth
-            # existing_user = collection_prueba.find_one({'_id': prueba['_id']})
-            # if existing_user is not None:
-            #     return Response({"error": "Ya existe un usuario con ese correo."},
-            #                     status=status.HTTP_400_BAD_REQUEST)
-            prueba['_id'] = ObjectId()
-            prueba['date'] = datetime.now()
-            prueba['array'] = []
-            prueba['objid'] = ObjectId(prueba['objid'])
-            result = collection_prueba.insert_one(prueba)
-            if result.acknowledged:
-                return Response({"message": "Objeto creado con éxito."}, status=status.HTTP_201_CREATED)
+            prueba["_id"] = ObjectId()
+            location = geolocator.geocode(prueba["lugar"])
+            if location:
+                prueba["lat"] = location.latitude
+                prueba["lon"] = location.longitude
+
+                result = collection_prueba.insert_one(prueba)
+                if result.acknowledged:
+                    return Response(
+                        {"message": "Objeto creado con éxito."},
+                        status=status.HTTP_201_CREATED,
+                    )
+                else:
+                    return Response(
+                        {"error": "Algo salió mal. Objeto no creado."},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    )
             else:
-                return Response({"error": "Algo salió mal. Objeto no creado."}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return Response({"error": "Dirección no válida"})
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-@api_view(['GET','PUT', 'DELETE'])
+
+@api_view(["GET", "PUT", "DELETE"])
 def prueba_detail_view(request, idp):
-    if request.method == 'PUT':
+    if request.method == "PUT":
         serializer = PruebaSerializer(data=request.data)
         if serializer.is_valid():
             prueba = serializer.validated_data
-            prueba['_id'] = ObjectId(idp)
-            result = collection_prueba.replace_one({'_id': ObjectId(idp)}, prueba)
-            if result.acknowledged:
-                return Response({"message": "Objeto actualizado con éxito",},
-                                status=status.HTTP_200_OK)
+            prueba["_id"] = ObjectId(idp)
+
+            location = geolocator.geocode(prueba["lugar"])
+            if location:
+                prueba["lat"] = location.latitude
+                prueba["lon"] = location.longitude
+
+                result = collection_prueba.replace_one({"_id": ObjectId(idp)}, prueba)
+                if result.acknowledged:
+                    return Response(
+                        {
+                            "message": "Objeto actualizado con éxito",
+                        },
+                        status=status.HTTP_200_OK,
+                    )
+                else:
+                    return Response(
+                        {"error": "Algo salió mal. Objeto no actualizado."},
+                        status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                    )
             else:
-                return Response({"error": "Algo salió mal. Objeto no actualizado."},
-                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return Response({"error": "Dirección no válida"})
+
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
 
-    elif request.method == 'GET':
-            p = collection_prueba.find_one({'_id': ObjectId(idp)})
-            p['_id'] = str(ObjectId(p.get('_id', [])))
-            p['objid'] = str(ObjectId(p.get('objid', [])))
+    elif request.method == "GET":
+        p = collection_prueba.find_one({"_id": ObjectId(idp)})
+        p["_id"] = str(ObjectId(p.get("_id", [])))
 
-            serializer = PruebaSerializer(data=p)
-            if serializer.is_valid():
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    
+        serializer = PruebaSerializer(data=p)
+        if serializer.is_valid():
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    elif request.method == 'DELETE' :
-        delete_data = collection_prueba.delete_one({'_id': ObjectId(idp)})
+    elif request.method == "DELETE":
+        delete_data = collection_prueba.delete_one({"_id": ObjectId(idp)})
         if delete_data.deleted_count == 1:
-            return Response({"mensaje": "Objeto eliminado con éxito"}, status=status.HTTP_200_OK)
+            return Response(
+                {"mensaje": "Objeto eliminado con éxito"}, status=status.HTTP_200_OK
+            )
         else:
-            return Response({"error": "Objeto no encontrado"}, status=status.HTTP_404_NOT_FOUND)
+            return Response(
+                {"error": "Objeto no encontrado"}, status=status.HTTP_404_NOT_FOUND
+            )
+
+
+# ----------------- BÚSQUEDAS PARAMETRIZADAS ------------------
+@api_view(["GET"])
+def find_by_lon_and_lat(request, direccion):
+    if request.method == "GET":
+        location = geolocator.geocode(direccion)
+        if location:
+            query = {
+                "lat": {
+                    "$gte": location.latitude - 0.2,
+                    "$lte": location.latitude + 0.2,
+                },
+                "lon": {
+                    "$gte": location.longitude - 0.2,
+                    "$lte": location.longitude + 0.2,
+                },
+            }
+            prueba = list(collection_prueba.find(query).sort("timestamp", pymongo.ASCENDING))
+            for p in prueba:
+                p["_id"] = str(ObjectId(p.get("_id", [])))
+
+            prueba_serializer = PruebaSerializer(data=prueba, many=True)
+            if prueba_serializer.is_valid():
+                json_data = prueba_serializer.data
+                return Response(json_data, status=status.HTTP_200_OK)
+            else:
+                return Response(
+                    prueba_serializer.errors, status=status.HTTP_400_BAD_REQUEST
+                )
+        else:
+            return Response({"error": "Dirección no válida"})
+
 
 # ----------------- OAUTH ----------------
-CLIENT_ID = '644438743416-8qs1a5l687337gn7kfmthut9jrvtv1bs.apps.googleusercontent.com'
-@api_view(['POST'])
+CLIENT_ID = "644438743416-8qs1a5l687337gn7kfmthut9jrvtv1bs.apps.googleusercontent.com"
+
+
+@api_view(["POST"])
 def oauth(request):
-    if request.method == 'POST':
+    if request.method == "POST":
         serializer = TokenSerializer(data=request.data)
         if serializer.is_valid():
             tokenData = serializer.validated_data
             try:
-                token = tokenData['idtoken']
+                token = tokenData["idtoken"]
                 # Specify the CLIENT_ID of the app that accesses the backend:
-                idinfo = id_token.verify_oauth2_token(token, requests.Request(), CLIENT_ID)
+                idinfo = id_token.verify_oauth2_token(
+                    token, requests.Request(), CLIENT_ID
+                )
 
                 # Or, if multiple clients access the backend server:
                 # idinfo = id_token.verify_oauth2_token(token, requests.Request())
@@ -129,37 +193,42 @@ def oauth(request):
                 #     raise ValueError('Wrong hosted domain.')
 
                 # ID token is valid. Get the user's Google Account ID from the decoded token.
-                userid = idinfo['sub']
+                userid = idinfo["sub"]
                 if userid:
-                    return Response({"userid": userid,},
-                                    status=status.HTTP_200_OK)
+                    return Response(
+                        {
+                            "userid": userid,
+                        },
+                        status=status.HTTP_200_OK,
+                    )
             except ValueError:
                 # Invalid token
-                return Response({"error": "Token no valido",},
-                                    status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return Response(
+                    {
+                        "error": "Token no valido",
+                    },
+                    status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                )
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
 # -------------- CLOUDINARY --------------------
-@api_view(['POST'])
+@api_view(["POST"])
 def upload_image(request):
-    if request.method == 'POST' and request.FILES.getlist('images'):
-        uploaded_files = request.FILES.getlist('images')
+    if request.method == "POST" and request.FILES.getlist("images"):
+        uploaded_files = request.FILES.getlist("images")
         uploaded_urls = []
 
         # Upload each image to Cloudinary
         cloudinary.config(
-                cloud_name="dx4oicqhy",
-                api_key="765172224316842",
-                api_secret="ojkOD6jTPcuYjU5Z_77do1AI-VY"
-            )
+            cloud_name="dx4oicqhy",
+            api_key="765172224316842",
+            api_secret="ojkOD6jTPcuYjU5Z_77do1AI-VY",
+        )
 
         for file in uploaded_files:
-            upload_result = cloudinary.uploader.upload(
-                file,
-                folder='examen_folder'
-            )
-            uploaded_urls.append(upload_result['secure_url'])
-        return JsonResponse({'urls': uploaded_urls})
+            upload_result = cloudinary.uploader.upload(file, folder="examen_folder")
+            uploaded_urls.append(upload_result["secure_url"])
+        return JsonResponse({"urls": uploaded_urls})
     return HttpResponse(status=400)

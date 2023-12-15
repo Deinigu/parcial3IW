@@ -3,16 +3,13 @@ from rest_framework import serializers
 class PruebaSerializer(serializers.Serializer):
 
     _id = serializers.CharField(max_length = 24, required=False)
-    string = serializers.CharField()
-    date = serializers.DateTimeField(required=False)
-    array = serializers.ListField()
-    double = serializers.FloatField()
-    boolean = serializers.BooleanField()
-    inte = serializers.IntegerField()
-    objid = serializers.CharField(max_length = 24, required=False)
-
-class TokenSerializer(serializers.Serializer):
-    idtoken = serializers.CharField()
-
+    nombre = serializers.CharField()
+    timestamp = serializers.DateTimeField(required=False)
+    lugar = serializers.CharField()
+    lat = serializers.FloatField(required = False)
+    lon = serializers.FloatField(required = False)
+    organizador = serializers.CharField()
+    imagen = serializers.CharField()
+    
 class TokenSerializer(serializers.Serializer):
     idtoken = serializers.CharField()

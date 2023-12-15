@@ -1,3 +1,8 @@
-<div class="container">
-    <h1>¡Hola, {{name}}!</h1>
+<div class="container mt-5">
+    <h1>Eventual</h1>
+    <h1>Introduce tu dirección:</h1>
+    <form #formBusca="ngForm" (ngSubmit)="redirectBusqueda(formBusca.value)" class="d-flex mx-auto" id="busqueda" role="search" >
+        <input name="busca" ngModel class="form-control me-2" type="search" aria-label="Search" style="width: 400px;">
+        <button class="btn" type="submit">Enviar</button>
+    </form>
 </div>

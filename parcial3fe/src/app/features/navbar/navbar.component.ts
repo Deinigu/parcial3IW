@@ -27,6 +27,10 @@ export class NavbarComponent{
     location.reload();
   }
 
+  redirigirCrearEvento(): void {
+    this.router.navigate(['/crearEvento']);
+  }
+/*
   redirigirSubirImagen(): void{
     this.router.navigate(['/imagen']);
   }
@@ -34,5 +38,5 @@ export class NavbarComponent{
   redirigirMapa(): void{
     this.router.navigate(['/map'])
   }
-
+*/
 }
